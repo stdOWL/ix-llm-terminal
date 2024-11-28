@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ix"
+version = "0.1.0"
+description = "An intelligent terminal assistant for awslogs powered by Python and LLaMA."
+authors = ["stdOWL <osman.ozturk2@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+rich = "^13.9.4"
+halo = "^0.0.31"
+llama-cpp-python = "^0.3.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
