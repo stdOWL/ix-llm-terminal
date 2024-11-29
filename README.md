@@ -21,7 +21,7 @@ Ensure you have Python 3.12 or above installed. Then, install `ix` using the fol
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ix.git
+git clone https://github.com/stdOWL/ix-llm-terminal.git
 cd ix
 
 # Install dependencies using Poetry
