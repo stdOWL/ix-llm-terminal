@@ -1,8 +1,12 @@
 import subprocess
 from pathlib import Path
+from typing import Optional
+
+from huggingface_hub import ModelInfo
 from rich.console import Console
 from halo import Halo
 import questionary
+import huggingface_hub
 
 # Constants
 LLAMA_REPO = "https://github.com/ggerganov/llama.cpp"
@@ -10,29 +14,8 @@ LLAMA_CPP_DIR = Path("./llama.cpp")  # Path to the llama.cpp directory
 # Rich console for styled outputs
 console = Console()
 
-MODELS = [
-    {
-        "name": "llama-7b",
-        "description": "LLaMA 7B model",
-        "default": True,
-        "dir": "models/7B",
-        "files": [
-            "pytorch_model-00001-of-00002.bin",
-            "pytorch_model-00002-of-00002.bin",
-            "tokenizer.model",
-            "config.json",
-        ],
-        "urls": [
-            f"https://huggingface.co/huggyllama/llama-7b/resolve/main/{file}"
-            for file in [
-                "pytorch_model-00001-of-00002.bin",
-                "pytorch_model-00002-of-00002.bin",
-                "tokenizer.model",
-                "config.json",
-            ]
-        ],
-    }
-]
+# List of available models for LLaMA
+MODELS = list(huggingface_hub.list_models(author="lmsys"))
 
 
 def is_llama_setup_complete():
@@ -47,13 +30,6 @@ def is_llama_setup_complete():
         if not LLAMA_CPP_DIR.exists() or not LLAMA_CPP_DIR.is_dir():
             spinner.warn("llama.cpp directory is missing.")
             console.print("[bold red]Error:[/bold red] The llama.cpp directory was not found.")
-            return False
-
-        # Check if the llama.cpp build is complete (e.g., 'main' binary exists)
-        if not (LLAMA_CPP_DIR / "main").exists():
-            spinner.warn("llama.cpp build incomplete.")
-            console.print(
-                "[bold red]Error:[/bold red] The llama.cpp binary ('main') is missing. Build might not be complete.")
             return False
 
         return True
@@ -82,6 +58,7 @@ def clone_repository():
             "[bold red]Error: Git is not installed on your system.[/bold red]\n"
             "Please install Git or manually download the llama.cpp repository from:\n"
             "[blue underline]https://github.com/ggerganov/llama.cpp[/blue underline]"
+            f" and place it to {LLAMA_CPP_DIR}."
         )
         raise SystemExit("Git is required for this setup.")
 
@@ -95,7 +72,7 @@ def clone_repository():
             subprocess.run(["git", "clone", LLAMA_REPO], check=True)
 
 
-def ask_for_model_choice():
+def ask_for_model_choice() -> Optional[ModelInfo]:
     """
     Ask the user to choose a model for LLaMA using an interactive arrow-based selection.
 
@@ -107,8 +84,7 @@ def ask_for_model_choice():
 
     model_choice = questionary.select(
         "Choose a model:",
-        choices=[model["name"] for model in MODELS],
-        default=next((model["name"] for model in MODELS if model.get("default")), "llama-7b"),
+        choices=[model.id for model in MODELS]
     ).ask()
 
     if model_choice is None:
@@ -116,25 +92,21 @@ def ask_for_model_choice():
         raise SystemExit("Model selection required")
 
     console.print(f"[bold green]You selected: {model_choice}[/bold green]")
-    return model_choice
+    return next((model for model in MODELS if model.id == model_choice), None)
 
 
-def download_model_files(model):
+def download_model_files(model_info: ModelInfo):
     """
     Download the selected model for LLaMA.
 
     Args:
         model (str): The model name to download.
     """
-    model_info = next((m for m in MODELS if m["name"] == model), None)
-    if model_info is None:
-        console.print(f"[bold red]Error: Model '{model}' not found.[/bold red]")
-        return
-
-    console.print(f"[bold yellow]Downloading model files for {model}...[/bold yellow]")
+    console.print("[bold yellow]Downloading model files...[/bold yellow]")
     with Halo(text="Downloading model files", spinner="dots"):
-        for url in model_info["urls"]:
-            subprocess.run(["wget", url, "-P", str(LLAMA_CPP_DIR / model_info["dir"])], check=True)
+        huggingface_hub.snapshot_download(repo_id=model_info.id, local_dir=f"{LLAMA_CPP_DIR}/models/{model_info.id}",
+                                          revision="main")
+    console.print("[bold green]Model files downloaded successfully![/bold green]")
 
 
 def setup_llama():

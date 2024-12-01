@@ -11,6 +11,12 @@ rich = "^13.9.4"
 halo = "^0.0.31"
 llama-cpp-python = "^0.3.2"
 questionary = "^2.0.1"
+transformers = "^4.46.3"
+torch = "^2.5.1"
+sentencepiece = "^0.2.0"
+huggingface-hub = "^0.26.3"
+python-dotenv = "^1.0.1"
+openai = "^1.55.3"
 
 
 [build-system]
