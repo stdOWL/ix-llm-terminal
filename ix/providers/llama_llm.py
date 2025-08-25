@@ -28,3 +28,9 @@ class LocalLLM(LLM):
             except Exception:
                 return False
         return True
+
+    def fine_tune(self, data: str):
+        """
+        Fine-tunes the model with the given examples.
+        """
+        pass

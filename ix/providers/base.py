@@ -19,3 +19,10 @@ class LLM(ABC):
         Check if the LLM is ready for use.
         """
         pass
+
+    @abstractmethod
+    def fine_tune(self, dataset_path: str) -> None:
+        """
+        Fine-tune the LLM on the given dataset.
+        """
+        pass

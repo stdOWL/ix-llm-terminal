@@ -132,3 +132,24 @@ def setup_llama():
         console.print("[bold green]LLaMA setup is complete![/bold green]")
     else:
         console.print("[bold red]LLaMA setup failed.[/bold red]")
+
+
+def ask_provider():
+    """
+    Ask the user to choose a provider for LLM using an interactive arrow-based selection(OpenAI or LLaMA).
+    """
+    console.print("[bold yellow]Select a provider for LLM:[/bold yellow]")
+
+    provider_choice = questionary.select(
+        "Choose a provider:",
+        choices=["OpenAI", "LLaMA"]
+    ).ask()
+
+    if provider_choice is None:
+        console.print("[bold red]Error: Provider selection is required. Exiting setup.[/bold red]")
+        raise SystemExit("Provider selection required")
+
+    console.print(f"[bold green]You selected: {provider_choice}[/bold green]")
+    return provider_choice
+
+

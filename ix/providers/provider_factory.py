@@ -11,6 +11,6 @@ def get_provider():
     if Config.PROVIDER == "local":
         return LocalLLM()
     elif Config.PROVIDER == "openai":
-        return OpenAILLM()
+        return OpenAILLM(api_key=Config.OPENAI_API_KEY, model_name=Config.OPENAI_MODEL_NAME)
     else:
         raise InvalidProviderError(f"Invalid provider: {Config.PROVIDER}")
